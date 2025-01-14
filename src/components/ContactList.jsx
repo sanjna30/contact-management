@@ -1,27 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ContactCard from "./ContactCard";
-import Pagination from "./Pagination";
 
 const ContactList = () => {
-  const [contacts, setContacts] = useState([]); // Contacts ka state
-  const [currentPage, setCurrentPage] = useState(1);
-  const contactsPerPage = 20;
+  const [contacts, setContacts] = useState([]);
 
-  // Pagination logic
-  const indexOfLastContact = currentPage * contactsPerPage;
-  const indexOfFirstContact = indexOfLastContact - contactsPerPage;
-  const currentContacts = contacts.slice(indexOfFirstContact, indexOfLastContact);
+  useEffect(() => {
+    const savedContacts = JSON.parse(localStorage.getItem("contacts")) || [];
+    setContacts(savedContacts);
+  }, []);
+
+  const handleDelete = (index) => {
+    const updatedContacts = contacts.filter((_, i) => i !== index);
+    setContacts(updatedContacts);
+    localStorage.setItem("contacts", JSON.stringify(updatedContacts));
+  };
 
   return (
     <div>
-      {currentContacts.map((contact, index) => (
-        <ContactCard key={index} contact={contact} />
-      ))}
-      <Pagination
-        totalContacts={contacts.length}
-        contactsPerPage={contactsPerPage}
-        setCurrentPage={setCurrentPage}
-      />
+      <h2>Contact List</h2>
+      {contacts.length ? (
+        contacts.map((contact, index) => (
+          <ContactCard key={index} contact={contact} onDelete={() => handleDelete(index)} />
+        ))
+      ) : (
+        <p>No contacts yet. Add one!</p>
+      )}
     </div>
   );
 };
